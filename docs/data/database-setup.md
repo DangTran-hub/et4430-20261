@@ -54,3 +54,30 @@ approval workflow. Semester parity, academic-warning storage, notification
 recipients/read state, and notification uniqueness remain unresolved and are not
 invented here. PDT authorization, student-specific access and inheritance rules
 require later application work. This migration is only the database foundation.
+
+## V2 decisions (UC1 implementation + student registration)
+
+`V2__warning_level_and_course_registration.sql` resolves the decisions needed to
+implement UC1 and student course registration:
+
+- **Semester type** = `academic_term.term_code`: `SEMESTER_1` (odd), `SEMESTER_2`
+  (even), `SUMMER`. `course_term_rule.term_code` uses the same values.
+- **Inheritance source**: the most recent `PUBLISHED` campaign whose term has the
+  same `term_code` and an earlier `academic_year`. Its `OPEN` courses are copied
+  (with `copied_from_campaign_course_id`) and its registration dates are shifted by
+  the year difference. Courses with an active rule that the source lacked are added.
+- **Lifecycle**: `DRAFT -> PUBLISHED`; PDT reviews and publishes (no separate
+  approver). A draft can be `CANCELLED`. Only drafts are editable.
+- **One plan per term**: partial unique index on `registration_campaign(term_id)`
+  where `status <> 'CANCELLED'`.
+- **One notification per campaign**: unique `notification(campaign_id)`; it is
+  created in the same transaction as publication. All students see it.
+- **Academic warning**: `student_profile.academic_warning_level` 0..3. Credit
+  limits live in `WarningPolicy`: 0 -> 12..24, 1 -> max 14, 2 -> max 10,
+  3 -> cannot register.
+- **Registration window**: a student can register/unregister only while the
+  campaign is `PUBLISHED` and now is between open and close times.
+- **Timezone**: input and display use Asia/Ho_Chi_Minh; storage is timestamptz.
+
+Demo accounts and terms are created by `DemoDataInitializer` (not by Flyway) when
+`app.demo-data=true` and no `pdt` account exists.

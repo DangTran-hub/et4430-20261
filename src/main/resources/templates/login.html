@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Đăng nhập')}"></head>
+<body class="login-page">
+<main class="login-card">
+    <h1>Đăng ký học phần</h1>
+    <p class="muted">Đăng nhập bằng tài khoản Phòng Đào tạo hoặc sinh viên.</p>
+
+    <div class="alert error" th:if="${param.error}">Sai tên đăng nhập hoặc mật khẩu.</div>
+    <div class="alert info" th:if="${param.logout}">Bạn đã đăng xuất.</div>
+
+    <form th:action="@{/login}" method="post" class="stack">
+        <label>Tên đăng nhập
+            <input type="text" name="username" autofocus required>
+        </label>
+        <label>Mật khẩu
+            <input type="password" name="password" required>
+        </label>
+        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+    </form>
+
+    <details class="demo-accounts">
+        <summary>Tài khoản demo</summary>
+        <table>
+            <tr><td>pdt / pdt123</td><td>Phòng Đào tạo</td></tr>
+            <tr><td>sv01 / sv123</td><td>Bình thường</td></tr>
+            <tr><td>sv02 / sv123</td><td>Cảnh báo mức 1</td></tr>
+            <tr><td>sv03 / sv123</td><td>Cảnh báo mức 2</td></tr>
+            <tr><td>sv04 / sv123</td><td>Cảnh báo mức 3</td></tr>
+        </table>
+    </details>
+</main>
+</body>
+</html>

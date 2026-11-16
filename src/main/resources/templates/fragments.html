@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · Đăng ký học phần'">Đăng ký học phần</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<header th:fragment="nav(area)" class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" th:href="@{/}">Đăng ký học phần</a>
+        <span class="area" th:text="${area}">Khu vực</span>
+        <span class="spacer"></span>
+        <span class="user" th:text="${currentUserName}">Người dùng</span>
+        <form th:action="@{/logout}" method="post" class="inline">
+            <button type="submit" class="btn btn-ghost">Đăng xuất</button>
+        </form>
+    </div>
+</header>
+
+<div th:fragment="flash">
+    <div class="alert info" th:if="${info}" th:text="${info}"></div>
+    <div class="alert error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+</body>
+</html>

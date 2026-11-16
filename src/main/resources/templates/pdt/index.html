@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Phòng Đào tạo')}"></head>
+<body>
+<header th:replace="~{fragments :: nav('Phòng Đào tạo')}"></header>
+<main class="container">
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <h1>Mở đợt đăng ký học phần</h1>
+    <p class="muted">Chọn học kỳ cần mở đợt. Hệ thống tự xác định kỳ chẵn/lẻ, chọn học phần phù hợp
+        và kế thừa thông tin từ đợt trước cùng loại học kỳ.</p>
+
+    <section class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>Năm học</th>
+                <th>Học kỳ</th>
+                <th>Loại kỳ</th>
+                <th>Thời gian học</th>
+                <th>Đợt đăng ký</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${terms}" th:with="c=${campaignByTerm[t.id]}">
+                <td th:text="${t.academicYear}">2026-2027</td>
+                <td th:text="${@fmt.term(t)}">Học kỳ 2</td>
+                <td th:text="${@fmt.termType(t)}">kỳ chẵn</td>
+                <td th:text="${#temporals.format(t.termStartDate, 'dd/MM/yyyy')} + ' – ' + ${#temporals.format(t.termEndDate, 'dd/MM/yyyy')}"></td>
+                <td>
+                    <a th:if="${c != null}" th:href="@{/pdt/campaigns/{id}(id=${c.id})}">
+                        <span th:class="${@fmt.windowCss(c)}" th:text="${@fmt.window(c)}">Đang mở</span>
+                    </a>
+                    <span th:if="${c == null}" class="muted">Chưa có</span>
+                </td>
+                <td class="right">
+                    <form th:if="${c == null}" th:action="@{/pdt/campaigns/prepare}" method="post" class="inline">
+                        <input type="hidden" name="termId" th:value="${t.id}">
+                        <button type="submit" class="btn btn-primary">Mở đợt đăng ký</button>
+                    </form>
+                    <form th:if="${c != null}" th:action="@{/pdt/campaigns/prepare}" method="post" class="inline">
+                        <input type="hidden" name="termId" th:value="${t.id}">
+                        <button type="submit" class="btn btn-ghost" title="Thử tạo trùng để xem cảnh báo 4a">Mở lại</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <h2>Các đợt đăng ký</h2>
+    <section class="card">
+        <p th:if="${#lists.isEmpty(campaigns)}" class="muted">Chưa có đợt đăng ký nào.</p>
+        <table th:unless="${#lists.isEmpty(campaigns)}">
+            <thead>
+            <tr><th>Học kỳ</th><th>Bắt đầu</th><th>Kết thúc</th><th>Trạng thái</th><th>Kế thừa từ</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${campaigns}">
+                <td><a th:href="@{/pdt/campaigns/{id}(id=${c.id})}" th:text="${@fmt.term(c.term)}">Học kỳ</a></td>
+                <td th:text="${@fmt.dt(c.registrationOpenAt)}"></td>
+                <td th:text="${@fmt.dt(c.registrationCloseAt)}"></td>
+                <td><span th:class="${@fmt.windowCss(c)}" th:text="${@fmt.window(c)}"></span></td>
+                <td th:text="${c.copiedFromCampaign != null} ? ${@fmt.term(c.copiedFromCampaign.term)} : '—'"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

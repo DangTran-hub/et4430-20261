@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Đăng ký học phần')}"></head>
+<body>
+<header th:replace="~{fragments :: nav('Sinh viên')}"></header>
+<main class="container">
+    <p><a th:href="@{/sv}">← Trang chủ</a></p>
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <h1>
+        <span th:text="'Đăng ký học phần ' + ${@fmt.term(campaign.term)}">Đăng ký học phần</span>
+        <span th:class="${@fmt.windowCss(campaign)}" th:text="${@fmt.window(campaign)}">Đang mở</span>
+    </h1>
+    <p class="muted">
+        Thời gian đăng ký: <span th:text="${@fmt.dt(campaign.registrationOpenAt)}"></span>
+        – <span th:text="${@fmt.dt(campaign.registrationCloseAt)}"></span>
+    </p>
+
+    <div class="alert error" th:unless="${canRegister}"
+         th:text="'Bạn đang ở ' + ${@fmt.warning(student.academicWarningLevel)} + ' nên không được đăng ký học phần trong kỳ này.'"></div>
+    <div class="alert warn" th:if="${canRegister and !windowOpen}">Hiện không trong thời gian đăng ký; bạn chỉ xem được danh sách học phần.</div>
+
+    <div class="grid">
+        <section class="card">
+            <h2>Học phần mở trong đợt</h2>
+            <table>
+                <thead>
+                <tr><th>Mã HP</th><th>Tên học phần</th><th class="num">TC</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="cc : ${courses}">
+                    <td th:text="${cc.course.courseCode}"></td>
+                    <td th:text="${cc.course.courseName}"></td>
+                    <td class="num" th:text="${@fmt.credits(cc.course.credits)}"></td>
+                    <td class="right">
+                        <span th:if="${registeredIds.contains(cc.id)}" class="badge ok">Đã đăng ký</span>
+                        <form th:if="${!registeredIds.contains(cc.id) and windowOpen and canRegister}"
+                              th:action="@{/sv/campaigns/{id}/register(id=${campaign.id})}" method="post" class="inline">
+                            <input type="hidden" name="campaignCourseId" th:value="${cc.id}">
+                            <button type="submit" class="btn btn-primary">Đăng ký</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <aside class="card">
+            <h2>Học phần đã đăng ký</h2>
+            <div class="credit-box">
+                <span class="credit-total" th:text="${@fmt.credits(totalCredits)} + ' / ' + ${maxCredits} + ' TC'">0 / 24 TC</span>
+                <span th:class="${@fmt.warningCss(student.academicWarningLevel)}"
+                      th:text="${@fmt.warning(student.academicWarningLevel)}"></span>
+            </div>
+            <p class="muted" th:text="${@fmt.warningDesc(student.academicWarningLevel)}"></p>
+            <p class="alert warn" th:if="${canRegister and belowMin and minCredits > 0}"
+               th:text="'Cần đăng ký tối thiểu ' + ${minCredits} + ' tín chỉ.'"></p>
+
+            <p th:if="${#lists.isEmpty(registrations)}" class="muted">Chưa đăng ký học phần nào.</p>
+            <ul class="reg-list">
+                <li th:each="r : ${registrations}">
+                    <span>
+                        <strong th:text="${r.campaignCourse.course.courseCode}"></strong>
+                        <span th:text="${r.campaignCourse.course.courseName}"></span>
+                        <span class="muted" th:text="'(' + ${@fmt.credits(r.campaignCourse.course.credits)} + ' TC)'"></span>
+                    </span>
+                    <form th:if="${windowOpen}" th:action="@{/sv/campaigns/{id}/unregister(id=${campaign.id})}" method="post" class="inline">
+                        <input type="hidden" name="campaignCourseId" th:value="${r.campaignCourse.id}">
+                        <button type="submit" class="btn btn-ghost">Hủy</button>
+                    </form>
+                </li>
+            </ul>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

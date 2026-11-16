@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Đợt đăng ký')}"></head>
+<body>
+<header th:replace="~{fragments :: nav('Phòng Đào tạo')}"></header>
+<main class="container">
+    <p><a th:href="@{/pdt}">← Danh sách học kỳ</a></p>
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <h1>
+        <span th:text="'Đợt đăng ký ' + ${@fmt.term(campaign.term)}">Đợt đăng ký</span>
+        <span th:class="${@fmt.windowCss(campaign)}" th:text="${@fmt.window(campaign)}">Bản nháp</span>
+    </h1>
+    <p class="muted">
+        <span th:text="'Loại học kỳ: ' + ${@fmt.termType(campaign.term)}"></span>
+        <span th:if="${campaign.copiedFromCampaign != null}"
+              th:text="' · Kế thừa từ đợt ' + ${@fmt.term(campaign.copiedFromCampaign.term)}"></span>
+        <span th:if="${campaign.publishedAt != null}"
+              th:text="' · Công bố lúc ' + ${@fmt.dt(campaign.publishedAt)}"></span>
+    </p>
+
+    <section class="card">
+        <h2>Thời gian đăng ký</h2>
+        <form th:if="${editable}" th:action="@{/pdt/campaigns/{id}/dates(id=${campaign.id})}" method="post" class="row">
+            <label>Bắt đầu
+                <input type="datetime-local" name="openAt" th:value="${@fmt.input(campaign.registrationOpenAt)}">
+            </label>
+            <label>Kết thúc
+                <input type="datetime-local" name="closeAt" th:value="${@fmt.input(campaign.registrationCloseAt)}">
+            </label>
+            <button type="submit" class="btn">Lưu thời gian</button>
+        </form>
+        <p th:unless="${editable}">
+            Từ <strong th:text="${@fmt.dt(campaign.registrationOpenAt)}"></strong>
+            đến <strong th:text="${@fmt.dt(campaign.registrationCloseAt)}"></strong>
+        </p>
+    </section>
+
+    <section class="card">
+        <h2>Học phần trong đợt</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Mã HP</th><th>Tên học phần</th><th class="num">Tín chỉ</th><th>Nguồn</th><th>Trạng thái</th>
+                <th class="num" th:unless="${editable}">SV đã đăng ký</th>
+                <th th:if="${editable}"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="cc : ${courses}" th:classappend="${cc.offeringStatus == 'REMOVED'} ? 'removed'">
+                <td th:text="${cc.course.courseCode}"></td>
+                <td th:text="${cc.course.courseName}"></td>
+                <td class="num" th:text="${@fmt.credits(cc.course.credits)}"></td>
+                <td th:text="${cc.copiedFromCampaignCourse != null} ? 'Kế thừa' : 'Theo quy tắc / thêm mới'"></td>
+                <td th:text="${cc.offeringStatus == 'OPEN'} ? 'Mở' : 'Đã bỏ'"></td>
+                <td class="num" th:unless="${editable}" th:text="${regCounts[cc.id]}"></td>
+                <td th:if="${editable}" class="right">
+                    <form th:action="@{/pdt/campaigns/{id}/courses/{cc}/toggle(id=${campaign.id},cc=${cc.id})}" method="post" class="inline">
+                        <button type="submit" class="btn btn-ghost"
+                                th:text="${cc.offeringStatus == 'OPEN'} ? 'Bỏ khỏi đợt' : 'Mở lại'">Bỏ</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <form th:if="${editable and !#lists.isEmpty(availableCourses)}"
+              th:action="@{/pdt/campaigns/{id}/courses/add(id=${campaign.id})}" method="post" class="row top-gap">
+            <label>Thêm học phần
+                <select name="courseId">
+                    <option th:each="c : ${availableCourses}" th:value="${c.id}"
+                            th:text="${c.courseCode} + ' – ' + ${c.courseName} + ' (' + ${@fmt.credits(c.credits)} + ' TC)'"></option>
+                </select>
+            </label>
+            <button type="submit" class="btn">Thêm</button>
+        </form>
+    </section>
+
+    <section class="card actions" th:if="${editable}">
+        <form th:action="@{/pdt/campaigns/{id}/publish(id=${campaign.id})}" method="post" class="inline">
+            <button type="submit" class="btn btn-primary">Xác nhận mở đợt và công bố thông báo</button>
+        </form>
+        <form th:action="@{/pdt/campaigns/{id}/cancel(id=${campaign.id})}" method="post" class="inline">
+            <button type="submit" class="btn btn-ghost">Hủy bản nháp</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

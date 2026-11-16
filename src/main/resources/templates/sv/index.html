@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Sinh viên')}"></head>
+<body>
+<header th:replace="~{fragments :: nav('Sinh viên')}"></header>
+<main class="container">
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <section class="card profile">
+        <div>
+            <h1 th:text="${student.user.fullName}">Họ tên</h1>
+            <p class="muted" th:text="'MSSV ' + ${student.studentCode} + ' · Lớp ' + ${student.classCode}"></p>
+        </div>
+        <div class="warning-box">
+            <span class="label">Trạng thái cảnh báo học tập</span>
+            <span th:class="${@fmt.warningCss(student.academicWarningLevel)}"
+                  th:text="${@fmt.warning(student.academicWarningLevel)}">Bình thường</span>
+            <span class="muted" th:text="${@fmt.warningDesc(student.academicWarningLevel)}"></span>
+        </div>
+    </section>
+
+    <h2>Đợt đăng ký học phần</h2>
+    <section class="card">
+        <p th:if="${#lists.isEmpty(campaigns)}" class="muted">Hiện chưa có đợt đăng ký nào được công bố.</p>
+        <table th:unless="${#lists.isEmpty(campaigns)}">
+            <thead>
+            <tr><th>Năm học</th><th>Học kỳ</th><th>Bắt đầu đăng ký</th><th>Kết thúc đăng ký</th><th>Trạng thái</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${campaigns}">
+                <td th:text="${c.term.academicYear}"></td>
+                <td th:text="${@fmt.term(c.term)}"></td>
+                <td th:text="${@fmt.dt(c.registrationOpenAt)}"></td>
+                <td th:text="${@fmt.dt(c.registrationCloseAt)}"></td>
+                <td><span th:class="${@fmt.windowCss(c)}" th:text="${@fmt.window(c)}"></span></td>
+                <td class="right"><a class="btn" th:href="@{/sv/campaigns/{id}(id=${c.id})}">Xem học phần</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <h2>Thông báo từ Phòng Đào tạo</h2>
+    <p th:if="${#lists.isEmpty(notifications)}" class="muted">Chưa có thông báo.</p>
+    <article class="card notice" th:each="n : ${notifications}">
+        <h3 th:text="${n.title}">Tiêu đề</h3>
+        <p class="muted" th:text="'Đăng lúc ' + ${@fmt.dt(n.publishedAt)}"></p>
+        <p th:text="${n.body}">Nội dung</p>
+    </article>
+</main>
+</body>
+</html>
