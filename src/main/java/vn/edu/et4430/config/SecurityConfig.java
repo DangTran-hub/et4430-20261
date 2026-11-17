@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfException;
 import vn.edu.et4430.repository.UserAccountRepository;
 
 /**
@@ -33,7 +34,16 @@ public class SecurityConfig {
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
-                        .permitAll());
+                        .permitAll())
+                // Máy chủ khởi động lại (deploy, hoặc Render ngủ rồi thức dậy) làm mất phiên:
+                // form gửi lên mang mã CSRF cũ -> quay về trang đăng nhập thay vì báo lỗi 403.
+                .exceptionHandling(ex -> ex.accessDeniedHandler((request, response, denied) -> {
+                    if (denied instanceof CsrfException) {
+                        response.sendRedirect(request.getContextPath() + "/login?expired");
+                    } else {
+                        response.sendError(403);
+                    }
+                }));
         return http.build();
     }
 
