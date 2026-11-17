@@ -9,6 +9,17 @@
         <div class="content">
             <div th:replace="~{fragments :: flash}"></div>
 
+            <section class="card toolbar">
+                <span class="label">Học kỳ hiện tại:</span>
+                <strong th:if="${currentTerm != null}" th:text="${@fmt.termCode(currentTerm)} + ' – ' + ${@fmt.term(currentTerm)}">20261 – Học kỳ 1 năm học 2026-2027</strong>
+                <span th:if="${currentTerm == null}" class="muted">Chưa có</span>
+                <span class="spacer" style="flex:1"></span>
+                <span class="muted small" th:text="'Kỳ tiếp theo: ' + ${nextTerm.name()} + ' (' + ${#temporals.format(nextTerm.start(), 'dd/MM/yyyy')} + ' – ' + ${#temporals.format(nextTerm.end(), 'dd/MM/yyyy')} + ')'"></span>
+                <form th:action="@{/pdt/terms/next}" method="post" class="inline">
+                    <button type="submit" class="btn btn-primary" th:text="'+ Tạo học kỳ mới ' + ${nextTerm.code()}">+ Tạo học kỳ mới 20262</button>
+                </form>
+            </section>
+
             <section class="card">
                 <h2>Mở đợt đăng ký học phần</h2>
                 <p class="muted small">Chọn học kỳ cần mở đợt. Hệ thống tự xác định kỳ chẵn/lẻ, chọn học phần phù hợp
@@ -17,6 +28,7 @@
                     <table>
                         <thead>
                         <tr>
+                            <th>Mã kỳ</th>
                             <th>Năm học</th>
                             <th>Học kỳ</th>
                             <th>Loại kỳ</th>
@@ -27,6 +39,7 @@
                         </thead>
                         <tbody>
                         <tr th:each="t : ${terms}" th:with="c=${campaignByTerm[t.id]}">
+                            <td class="center"><strong th:text="${@fmt.termCode(t)}">20262</strong></td>
                             <td th:text="${t.academicYear}">2026-2027</td>
                             <td th:text="${@fmt.term(t)}">Học kỳ 2</td>
                             <td th:text="${@fmt.termType(t)}">kỳ chẵn</td>
