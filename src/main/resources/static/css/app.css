@@ -326,6 +326,10 @@ select { cursor: pointer; }
 .term-edit form { gap: 6px; flex-wrap: wrap; }
 .term-edit input[type=date] { min-height: 34px; padding: 4px 8px; font-size: 14px; }
 
+/* Tìm kiếm sinh viên */
+.search-row { margin-bottom: 16px; }
+.search-row .search-field { flex: 1 1 320px; }
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
 }
