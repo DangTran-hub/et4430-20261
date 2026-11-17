@@ -20,8 +20,14 @@ printed pp. 13–15. This is a proposed model, not an existing schema.
   created_at, updated_at.
 - campaign_course: campaign_course_id PK, campaign_id FK, course_id FK,
   copied_from_campaign_course_id nullable self-FK, offering_status.
-- notification: notification_id PK, campaign_id FK,
+- notification: notification_id PK, campaign_id FK UNIQUE (V2),
   title, body, published_at, created_by FK.
+
+## Added in V2 (not in the report's dictionary)
+- student_profile.academic_warning_level: INTEGER 0..3 (UC1 step 7).
+- course_registration: registration_id PK, student_id FK -> student_profile,
+  campaign_course_id FK -> campaign_course, status, registered_at;
+  UNIQUE (student_id, campaign_course_id).
 
 Adjustment dates from the wider dictionary are deferred beyond UC1.
 Approval fields remain tentative until the review workflow is clarified.
@@ -40,6 +46,8 @@ erDiagram
     REGISTRATION_CAMPAIGN ||--o{ NOTIFICATION : announces
     REGISTRATION_CAMPAIGN o|--o{ REGISTRATION_CAMPAIGN : copied_from
     CAMPAIGN_COURSE o|--o{ CAMPAIGN_COURSE : copied_from
+    STUDENT_PROFILE ||--o{ COURSE_REGISTRATION : registers
+    CAMPAIGN_COURSE ||--o{ COURSE_REGISTRATION : registered_in
 ```
 
 The term relationship shows the general dictionary structure.

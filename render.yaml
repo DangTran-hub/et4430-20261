@@ -1,0 +1,68 @@
+# Render Blueprint: tạo database Postgres + web service và tự nối hai cái với nhau.
+# Hướng dẫn: docs/deploy-render.md
+databases:
+  - name: et4430-db
+    plan: free
+    region: singapore
+    databaseName: quanlyhocphan
+    user: et4430
+
+services:
+  - type: web
+    name: et4430-dang-ky-hoc-phan
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: feature/uc1-web
+    healthCheckPath: /login
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: et4430-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: et4430-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: et4430-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: et4430-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: et4430-db
+          property: password
+
+  # Địa chỉ mới: https://angiang-dkhp.onrender.com (dùng chung database với dịch vụ cũ)
+  - type: web
+    name: angiang-dkhp
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: feature/uc1-web
+    healthCheckPath: /login
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: et4430-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: et4430-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: et4430-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: et4430-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: et4430-db
+          property: password

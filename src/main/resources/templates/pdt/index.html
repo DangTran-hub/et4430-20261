@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Phòng Đào tạo')}"></head>
+<body>
+<header th:replace="~{fragments :: pdtTop}"></header>
+<div class="admin">
+    <aside th:replace="~{fragments :: pdtSide('campaigns')}"></aside>
+    <main class="admin-main">
+        <div class="content">
+            <div th:replace="~{fragments :: flash}"></div>
+
+            <section class="card toolbar">
+                <span class="label">Học kỳ hiện tại:</span>
+                <strong th:if="${currentTerm != null}" th:text="${@fmt.termCode(currentTerm)} + ' – ' + ${@fmt.term(currentTerm)}">20261 – Học kỳ 1 năm học 2026-2027</strong>
+                <span th:if="${currentTerm == null}" class="muted">Chưa có</span>
+                <span class="spacer" style="flex:1"></span>
+                <span class="muted small" th:text="'Kỳ tiếp theo: ' + ${nextTerm.name()} + ' (' + ${#temporals.format(nextTerm.start(), 'dd/MM/yyyy')} + ' – ' + ${#temporals.format(nextTerm.end(), 'dd/MM/yyyy')} + ')'"></span>
+                <form th:action="@{/pdt/terms/next}" method="post" class="inline">
+                    <button type="submit" class="btn btn-primary" th:text="'+ Tạo học kỳ mới ' + ${nextTerm.code()}">+ Tạo học kỳ mới 20262</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2>Mở đợt đăng ký học phần</h2>
+                <p class="muted small">Chọn học kỳ cần mở đợt. Hệ thống tự xác định kỳ chẵn/lẻ, chọn học phần phù hợp
+                    và kế thừa thông tin từ đợt trước cùng loại học kỳ.</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Mã kỳ</th>
+                            <th>Năm học</th>
+                            <th>Học kỳ</th>
+                            <th>Loại kỳ</th>
+                            <th>Thời gian học</th>
+                            <th>Đợt đăng ký</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="t : ${terms}" th:with="c=${campaignByTerm[t.id]}">
+                            <td class="center"><strong th:text="${@fmt.termCode(t)}">20262</strong></td>
+                            <td th:text="${t.academicYear}">2026-2027</td>
+                            <td th:text="${@fmt.term(t)}">Học kỳ 2</td>
+                            <td th:text="${@fmt.termType(t)}">kỳ chẵn</td>
+                            <td>
+                                <span th:text="${#temporals.format(t.termStartDate, 'dd/MM/yyyy')} + ' đến ' + ${#temporals.format(t.termEndDate, 'dd/MM/yyyy')}"></span>
+                                <details class="term-edit">
+                                    <summary class="btn btn-sm">Sửa</summary>
+                                    <form th:action="@{/pdt/terms/{id}/dates(id=${t.id})}" method="post" class="row">
+                                        <input type="date" name="start" th:value="${t.termStartDate}" required>
+                                        <input type="date" name="end" th:value="${t.termEndDate}" required>
+                                        <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+                                    </form>
+                                </details>
+                            </td>
+                            <td class="center">
+                                <a th:if="${c != null}" th:href="@{/pdt/campaigns/{id}(id=${c.id})}">
+                                    <span th:class="${@fmt.windowCss(c)}" th:text="${@fmt.window(c)}">Đang mở</span>
+                                </a>
+                                <span th:if="${c == null}" class="muted">Chưa có</span>
+                            </td>
+                            <td class="actions">
+                                <form th:action="@{/pdt/campaigns/prepare}" method="post" class="inline">
+                                    <input type="hidden" name="termId" th:value="${t.id}">
+                                    <button th:if="${c == null}" type="submit" class="btn btn-sm btn-success">Mở đợt</button>
+                                    <button th:if="${c != null}" type="submit" class="btn btn-sm"
+                                            title="Thử tạo trùng để xem thông báo 4a">Mở lại</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Các đợt đăng ký</h2>
+                <p th:if="${#lists.isEmpty(campaigns)}" class="muted">Chưa có đợt đăng ký nào.</p>
+                <div class="table-wrap" th:unless="${#lists.isEmpty(campaigns)}">
+                    <table>
+                        <thead>
+                        <tr><th>Học kỳ</th><th>Bắt đầu</th><th>Kết thúc</th><th>Trạng thái</th><th>Kế thừa từ</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="c : ${campaigns}">
+                            <td><a th:href="@{/pdt/campaigns/{id}(id=${c.id})}" th:text="${@fmt.term(c.term)}">Học kỳ</a></td>
+                            <td th:text="${@fmt.dt(c.registrationOpenAt)}"></td>
+                            <td th:text="${@fmt.dt(c.registrationCloseAt)}"></td>
+                            <td class="center"><span th:class="${@fmt.windowCss(c)}" th:text="${@fmt.window(c)}"></span></td>
+                            <td th:text="${c.copiedFromCampaign != null} ? ${@fmt.term(c.copiedFromCampaign.term)} : '—'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        <footer th:replace="~{fragments :: footer}"></footer>
+    </main>
+</div>
+</body>
+</html>

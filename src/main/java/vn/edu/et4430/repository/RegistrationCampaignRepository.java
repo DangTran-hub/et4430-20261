@@ -21,5 +21,19 @@ public interface RegistrationCampaignRepository extends JpaRepository<Registrati
     boolean existsByTerm_Id(Long termId);
 
     List<RegistrationCampaign> findByTerm_Id(Long termId);
-}
 
+    /** UC1 4a: đã có đợt chưa bị hủy cho học kỳ này chưa. */
+    boolean existsByTerm_IdAndStatusNot(Long termId, String status);
+
+    List<RegistrationCampaign> findByStatusNotOrderByCreatedAtDesc(String status);
+
+    List<RegistrationCampaign> findByStatusOrderByPublishedAtDesc(String status);
+
+    /** UC1 bước 3: các đợt đã công bố của cùng loại học kỳ, năm học trước, mới nhất trước. */
+    @Query("select c from RegistrationCampaign c join fetch c.term t "
+            + "where t.termCode = :termCode and t.academicYear < :academicYear and c.status = :status "
+            + "order by t.academicYear desc")
+    List<RegistrationCampaign> findPreviousOfSameTermType(@Param("termCode") String termCode,
+                                                          @Param("academicYear") String academicYear,
+                                                          @Param("status") String status);
+}

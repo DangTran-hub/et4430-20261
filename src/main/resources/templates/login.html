@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Đăng nhập')}"></head>
+<body>
+<div class="login-page">
+    <div class="login-brand">TRƯỜNG ĐẠI HỌC AN GIANG</div>
+
+    <main class="login-main">
+        <div class="login-card">
+            <h1>ĐĂNG NHẬP HỆ THỐNG</h1>
+
+            <div class="alert error" th:if="${param.error}">Sai tên đăng nhập hoặc mật khẩu.</div>
+            <div class="alert info" th:if="${param.logout}">Bạn đã đăng xuất.</div>
+            <div class="alert warn" th:if="${param.expired}">Phiên làm việc đã hết hạn, vui lòng đăng nhập lại.</div>
+
+            <form th:action="@{/login}" method="post" class="stack">
+                <label>Tài khoản:
+                    <input type="text" name="username" autofocus required>
+                </label>
+                <label>Mật khẩu:
+                    <input type="password" name="password" required>
+                </label>
+                <span class="forgot" title="Liên hệ Phòng Đào tạo để cấp lại mật khẩu">Quên mật khẩu?</span>
+                <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+                <p class="muted small center">Sinh viên chưa có tài khoản: liên hệ Phòng Đào tạo để được cấp.</p>
+            </form>
+
+            <details class="demo-accounts">
+                <summary>Tài khoản demo</summary>
+                <table>
+                    <tr><td>pdt / pdt123</td><td>Phòng Đào tạo</td></tr>
+                    <tr><td>sv01 / sv123</td><td>Bình thường</td></tr>
+                    <tr><td>sv02 / sv123</td><td>Cảnh báo mức 1</td></tr>
+                    <tr><td>sv03 / sv123</td><td>Cảnh báo mức 2</td></tr>
+                    <tr><td>sv04 / sv123</td><td>Cảnh báo mức 3</td></tr>
+                </table>
+            </details>
+        </div>
+    </main>
+
+    <div class="login-footer">
+        <span>© 2026 Trường Đại học An Giang • Phòng Đào tạo</span>
+        <span>Cổng đăng ký học phần • v1.0</span>
+    </div>
+</div>
+</body>
+</html>

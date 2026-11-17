@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import vn.edu.et4430.entity.AcademicTerm;
+import java.util.List;
 import java.util.Optional;
 
 public interface AcademicTermRepository extends JpaRepository<AcademicTerm, Long> {
@@ -14,5 +15,6 @@ public interface AcademicTermRepository extends JpaRepository<AcademicTerm, Long
     Optional<AcademicTerm> findLockedById(@Param("id") Long id);
 
     Optional<AcademicTerm> findByAcademicYearAndTermCode(String academicYear, String termCode);
-}
 
+    List<AcademicTerm> findAllByOrderByAcademicYearDescTermCodeAsc();
+}
