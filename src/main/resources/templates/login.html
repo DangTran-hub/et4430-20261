@@ -11,6 +11,7 @@
 
             <div class="alert error" th:if="${param.error}">Sai tên đăng nhập hoặc mật khẩu.</div>
             <div class="alert info" th:if="${param.logout}">Bạn đã đăng xuất.</div>
+            <div class="alert warn" th:if="${param.expired}">Phiên làm việc đã hết hạn, vui lòng đăng nhập lại.</div>
 
             <form th:action="@{/login}" method="post" class="stack">
                 <label>Tài khoản:

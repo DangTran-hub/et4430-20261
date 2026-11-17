@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Lỗi')}"></head>
+<body>
+<div class="login-page">
+    <div class="login-brand">TRƯỜNG ĐẠI HỌC AN GIANG</div>
+    <main class="login-main">
+        <div class="login-card center">
+            <h1 th:text="${status == 403} ? 'KHÔNG CÓ QUYỀN TRUY CẬP' : (${status == 404} ? 'KHÔNG TÌM THẤY TRANG' : 'ĐÃ CÓ LỖI XẢY RA')">ĐÃ CÓ LỖI XẢY RA</h1>
+            <p class="muted" th:if="${status == 403}">Tài khoản của bạn không được dùng chức năng này.</p>
+            <p class="muted" th:if="${status == 404}">Địa chỉ bạn mở không tồn tại.</p>
+            <p class="muted" th:unless="${status == 403 or status == 404}">Vui lòng thử lại sau ít phút.</p>
+            <p class="muted small" th:text="'Mã lỗi: ' + ${status}">Mã lỗi: 500</p>
+            <a class="btn btn-primary btn-block mt" th:href="@{/}">Về trang chủ</a>
+        </div>
+    </main>
+</div>
+</body>
+</html>
