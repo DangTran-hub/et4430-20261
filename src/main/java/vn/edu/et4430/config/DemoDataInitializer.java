@@ -38,11 +38,11 @@ import vn.edu.et4430.service.TermTypes;
  * Dữ liệu demo, chỉ tạo khi DB chưa có tài khoản "pdt".
  * Tắt bằng app.demo-data=false.
  *
- * Kịch bản demo UC1:
- *  - 2026-2027 Học kỳ 2  -> kế thừa từ đợt 2025-2026 Học kỳ 2 (đã công bố)
- *  - 2027-2028 Học kỳ 1  -> 3a: chưa có đợt kỳ lẻ trước đó, chọn theo quy tắc mở
- *  - 2026-2027 Học kỳ hè -> 3b: không có học phần mở kỳ hè
- *  - chuẩn bị lại một học kỳ đã có đợt -> 4a
+ * Kịch bản demo UC1 (kỳ hiện tại 20261):
+ *  - Tạo học kỳ mới 20262 -> Mở đợt: kế thừa từ đợt 20252 (đã công bố)
+ *  - Tạo tiếp 20263 (hè)  -> Mở đợt: 3b, không có học phần mở kỳ hè
+ *  - Tạo tiếp 20271       -> Mở đợt: 3a, chưa có đợt kỳ lẻ nào trước đó
+ *  - Bấm "Mở lại" ở kỳ đã có đợt -> 4a
  */
 @Component
 @ConditionalOnProperty(name = "app.demo-data", havingValue = "true")
@@ -98,9 +98,7 @@ public class DemoDataInitializer implements ApplicationRunner {
         // ---- Học kỳ ----
         AcademicTerm past = term("2025-2026", TermTypes.SEMESTER_2, "2026-02-16", "2026-06-30", "FINISHED");
         term("2026-2027", TermTypes.SEMESTER_1, "2026-09-07", "2027-01-17", "ACTIVE");
-        term("2026-2027", TermTypes.SEMESTER_2, "2027-02-22", "2027-07-04", "PLANNING");
-        term("2026-2027", TermTypes.SUMMER, "2027-07-12", "2027-08-22", "PLANNING");
-        term("2027-2028", TermTypes.SEMESTER_1, "2027-09-06", "2028-01-16", "PLANNING");
+        // Các kỳ sau (20262, 20263, 20271...) do PĐT tạo bằng nút "Tạo học kỳ mới"
 
         // ---- Học phần + quy tắc mở theo loại học kỳ ----
         String s1 = TermTypes.SEMESTER_1;
