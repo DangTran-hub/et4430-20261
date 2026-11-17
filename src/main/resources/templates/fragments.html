@@ -4,26 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title} + ' · Đăng ký học phần'">Đăng ký học phần</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="../static/css/app.css">
 </head>
 <body>
 
-<header th:fragment="nav(area)" class="topbar">
-    <div class="topbar-inner">
-        <a class="brand" th:href="@{/}">Đăng ký học phần</a>
-        <span class="area" th:text="${area}">Khu vực</span>
-        <span class="spacer"></span>
-        <span class="user" th:text="${currentUserName}">Người dùng</span>
-        <form th:action="@{/logout}" method="post" class="inline">
-            <button type="submit" class="btn btn-ghost">Đăng xuất</button>
-        </form>
-    </div>
+<!-- Phòng Đào tạo: thanh tiêu đề -->
+<header th:fragment="pdtTop" class="topbar">
+    <span class="title">PHÒNG ĐÀO TẠO</span>
+    <span class="spacer"></span>
+    <span class="user" th:text="${currentUserName}">Phòng Đào tạo</span>
 </header>
+
+<!-- Phòng Đào tạo: menu bên trái -->
+<aside th:fragment="pdtSide(active)" class="sidebar">
+    <a th:href="@{/pdt}" class="side-link" th:classappend="${active == 'campaigns'} ? 'active'">Mở đợt đăng ký học phần</a>
+    <a th:href="@{/pdt/students}" class="side-link" th:classappend="${active == 'students'} ? 'active'">Quản lý sinh viên</a>
+    <form th:action="@{/logout}" method="post" class="logout">
+        <button type="submit">Đăng xuất</button>
+    </form>
+</aside>
+
+<!-- Sinh viên: thanh tiêu đề -->
+<header th:fragment="svTop" class="topbar">
+    <span class="title">Đăng ký Học phần</span>
+    <span class="spacer"></span>
+    <span class="user" th:text="${currentUserName}">Sinh viên</span>
+    <form th:action="@{/logout}" method="post" class="inline">
+        <button type="submit" class="btn btn-primary">Đăng xuất</button>
+    </form>
+</header>
+
+<!-- Sinh viên: các tab -->
+<nav th:fragment="svTabs(active)" class="tabs">
+    <a th:href="@{/sv}" class="tab" th:classappend="${active == 'home'} ? 'active'">Thông báo</a>
+    <a th:href="@{/sv/register}" class="tab" th:classappend="${active == 'register'} ? 'active'">Đăng ký học phần</a>
+</nav>
 
 <div th:fragment="flash">
     <div class="alert info" th:if="${info}" th:text="${info}"></div>
     <div class="alert error" th:if="${error}" th:text="${error}"></div>
 </div>
+
+<footer th:fragment="footer" class="footer">© 2026 University Portal. All rights reserved.</footer>
 
 </body>
 </html>
