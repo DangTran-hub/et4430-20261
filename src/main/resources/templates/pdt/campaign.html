@@ -23,7 +23,8 @@
 
             <section class="card">
                 <h2>Thời gian đăng ký</h2>
-                <form th:if="${editable}" th:action="@{/pdt/campaigns/{id}/dates(id=${campaign.id})}" method="post" class="row">
+                <p th:if="${datesEditable and !editable}" class="muted small">Đợt đã công bố: vẫn sửa được thời gian (ví dụ gia hạn), thông báo gửi sinh viên sẽ được cập nhật theo.</p>
+                <form th:if="${datesEditable}" th:action="@{/pdt/campaigns/{id}/dates(id=${campaign.id})}" method="post" class="row">
                     <label>Bắt đầu
                         <input type="datetime-local" name="openAt" th:value="${@fmt.input(campaign.registrationOpenAt)}">
                     </label>
@@ -32,7 +33,7 @@
                     </label>
                     <button type="submit" class="btn btn-primary">Lưu thời gian</button>
                 </form>
-                <p th:unless="${editable}">
+                <p th:unless="${datesEditable}">
                     Từ <strong th:text="${@fmt.dt(campaign.registrationOpenAt)}"></strong>
                     đến <strong th:text="${@fmt.dt(campaign.registrationCloseAt)}"></strong>
                 </p>

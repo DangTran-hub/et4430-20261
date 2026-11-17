@@ -43,7 +43,17 @@
                             <td th:text="${t.academicYear}">2026-2027</td>
                             <td th:text="${@fmt.term(t)}">Học kỳ 2</td>
                             <td th:text="${@fmt.termType(t)}">kỳ chẵn</td>
-                            <td th:text="${#temporals.format(t.termStartDate, 'dd/MM/yyyy')} + ' đến ' + ${#temporals.format(t.termEndDate, 'dd/MM/yyyy')}"></td>
+                            <td>
+                                <span th:text="${#temporals.format(t.termStartDate, 'dd/MM/yyyy')} + ' đến ' + ${#temporals.format(t.termEndDate, 'dd/MM/yyyy')}"></span>
+                                <details class="term-edit">
+                                    <summary class="btn btn-sm">Sửa</summary>
+                                    <form th:action="@{/pdt/terms/{id}/dates(id=${t.id})}" method="post" class="row">
+                                        <input type="date" name="start" th:value="${t.termStartDate}" required>
+                                        <input type="date" name="end" th:value="${t.termEndDate}" required>
+                                        <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+                                    </form>
+                                </details>
+                            </td>
                             <td class="center">
                                 <a th:if="${c != null}" th:href="@{/pdt/campaigns/{id}(id=${c.id})}">
                                     <span th:class="${@fmt.windowCss(c)}" th:text="${@fmt.window(c)}">Đang mở</span>
