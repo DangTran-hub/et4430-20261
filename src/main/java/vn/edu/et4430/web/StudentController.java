@@ -55,6 +55,21 @@ public class StudentController {
         return "sv/index";
     }
 
+    /** Tab "Đăng ký học phần": mở đợt đang diễn ra, nếu không có thì đợt mới nhất. */
+    @GetMapping("/register")
+    public String currentCampaign(RedirectAttributes ra) {
+        List<RegistrationCampaign> published = campaignRepo.findByStatusOrderByPublishedAtDesc(CampaignService.PUBLISHED);
+        RegistrationCampaign target = published.stream()
+                .filter(CampaignService::isRegistrationOpen)
+                .findFirst()
+                .orElse(published.isEmpty() ? null : published.get(0));
+        if (target == null) {
+            ra.addFlashAttribute("error", "Hiện chưa có đợt đăng ký học phần nào được công bố.");
+            return "redirect:/sv";
+        }
+        return "redirect:/sv/campaigns/" + target.getId();
+    }
+
     /** Danh sách học phần của đợt + đăng ký. */
     @GetMapping("/campaigns/{id}")
     public String campaign(@PathVariable("id") Long id, Principal principal, Model model, RedirectAttributes ra) {
@@ -84,6 +99,10 @@ public class StudentController {
         model.addAttribute("maxCredits", WarningPolicy.maxCredits(level));
         model.addAttribute("minCredits", WarningPolicy.minCredits(level));
         model.addAttribute("belowMin", total.compareTo(BigDecimal.valueOf(WarningPolicy.minCredits(level))) < 0);
+        int max = WarningPolicy.maxCredits(level);
+        int percent = max <= 0 ? (total.signum() > 0 ? 100 : 0)
+                : Math.min(100, total.multiply(BigDecimal.valueOf(100)).intValue() / max);
+        model.addAttribute("progressPercent", percent);
         model.addAttribute("windowOpen", CampaignService.isRegistrationOpen(campaign));
         model.addAttribute("canRegister", WarningPolicy.canRegister(level));
         return "sv/campaign";
