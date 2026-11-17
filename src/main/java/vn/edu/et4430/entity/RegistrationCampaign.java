@@ -2,8 +2,6 @@ package vn.edu.et4430.entity;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
-import org.hibernate.annotations.Generated;
-import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "registration_campaign")
@@ -45,12 +43,10 @@ public class RegistrationCampaign {
     @Column(name = "published_at", nullable = true, columnDefinition = "timestamp with time zone")
     private OffsetDateTime publishedAt;
 
-    @Column(name = "created_at", nullable = false, columnDefinition = "timestamp with time zone", insertable = false, updatable = false)
-    @Generated(event = EventType.INSERT)
+    @Column(name = "created_at", nullable = false, columnDefinition = "timestamp with time zone", updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, columnDefinition = "timestamp with time zone", insertable = false)
-    @Generated(event = EventType.INSERT)
+    @Column(name = "updated_at", nullable = false, columnDefinition = "timestamp with time zone")
     private OffsetDateTime updatedAt;
 
     public RegistrationCampaign() {
@@ -134,6 +130,18 @@ public class RegistrationCampaign {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @PrePersist
+    void initializeAudit() {
+        OffsetDateTime now = OffsetDateTime.now(java.time.ZoneOffset.UTC);
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    void updateAudit() {
+        updatedAt = OffsetDateTime.now(java.time.ZoneOffset.UTC);
     }
 
     public OffsetDateTime getUpdatedAt() {
