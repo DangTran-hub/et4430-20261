@@ -224,3 +224,11 @@ input:focus, select:focus { outline: 2px solid #bfdbfe; border-color: var(--prim
 
 .footer { display: flex; justify-content: center; color: var(--muted); font-size: 13px; padding: 20px 0 4px; }
 .login-footer { display: flex; justify-content: space-between; gap: 16px; padding: 16px 48px 24px; color: var(--muted); font-size: 14px; flex-wrap: wrap; }
+
+/* Sửa thời gian học kỳ ngay trong bảng */
+.term-edit { display: inline-block; margin-left: 8px; vertical-align: middle; }
+.term-edit summary { list-style: none; display: inline-block; }
+.term-edit summary::-webkit-details-marker { display: none; }
+.term-edit[open] summary { margin-bottom: 6px; }
+.term-edit form { gap: 6px; flex-wrap: wrap; }
+.term-edit input[type=date] { padding: 4px 6px; }
