@@ -1,6 +1,9 @@
 package vn.edu.et4430.web;
 
+import java.text.Normalizer;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,8 +29,17 @@ public class PdtStudentController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("students", studentAccountService.listStudents());
+    public String list(@RequestParam(name = "q", required = false) String q, Model model) {
+        List<StudentProfile> all = studentAccountService.listStudents();
+        String key = normalize(q);
+        List<StudentProfile> shown = key.isEmpty() ? all : all.stream()
+                .filter(s -> normalize(s.getStudentCode()).contains(key)
+                        || normalize(s.getUser().getFullName()).contains(key)
+                        || normalize(s.getUser().getUsername()).contains(key))
+                .toList();
+        model.addAttribute("students", shown);
+        model.addAttribute("totalStudents", all.size());
+        model.addAttribute("q", q == null ? "" : q.trim());
         if (!model.containsAttribute("form")) {
             Map<String, String> empty = new HashMap<>();
             empty.put("programCode", "ET-E4");
@@ -64,7 +76,11 @@ public class PdtStudentController {
 
     @PostMapping("/{id}/warning")
     public String updateWarning(@PathVariable("id") Long id, @RequestParam("level") String level,
+                                @RequestParam(name = "q", required = false) String q,
                                 RedirectAttributes ra) {
+        if (q != null && !q.isBlank()) {
+            ra.addAttribute("q", q.trim());
+        }
         try {
             studentAccountService.updateWarningLevel(id, parseLevel(level));
             ra.addFlashAttribute("info", "Đã cập nhật mức cảnh báo.");
@@ -72,6 +88,17 @@ public class PdtStudentController {
             ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/pdt/students";
+    }
+
+    /** Bỏ dấu tiếng Việt, chữ thường: tìm "nguyen van a" vẫn ra "Nguyễn Văn A". */
+    private static String normalize(String value) {
+        if (value == null) {
+            return "";
+        }
+        String noMarks = Normalizer.normalize(value.trim(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .replace('đ', 'd').replace('Đ', 'D');
+        return noMarks.toLowerCase(Locale.ROOT);
     }
 
     private static Integer parseYear(String value) {
