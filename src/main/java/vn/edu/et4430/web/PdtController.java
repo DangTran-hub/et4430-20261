@@ -85,6 +85,21 @@ public class PdtController {
         return "redirect:/pdt";
     }
 
+    /** Sửa ngày bắt đầu / kết thúc học kỳ. */
+    @PostMapping("/terms/{id}/dates")
+    public String updateTermDates(@PathVariable("id") Long id,
+                                  @RequestParam(name = "start", required = false) String start,
+                                  @RequestParam(name = "end", required = false) String end,
+                                  RedirectAttributes ra) {
+        try {
+            AcademicTerm term = termService.updateDates(id, start, end);
+            ra.addFlashAttribute("info", "Đã cập nhật thời gian học kỳ " + TermService.code(term) + ".");
+        } catch (BusinessException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/pdt";
+    }
+
     /** UC1 bước 3: hệ thống chuẩn bị đợt nháp. */
     @PostMapping("/campaigns/prepare")
     public String prepare(@RequestParam("termId") Long termId, Principal principal, RedirectAttributes ra) {
@@ -124,6 +139,7 @@ public class PdtController {
         model.addAttribute("regCounts", regCounts);
         model.addAttribute("availableCourses", available);
         model.addAttribute("editable", CampaignService.DRAFT.equals(campaign.getStatus()));
+        model.addAttribute("datesEditable", !CampaignService.CANCELLED.equals(campaign.getStatus()));
         return "pdt/campaign";
     }
 
