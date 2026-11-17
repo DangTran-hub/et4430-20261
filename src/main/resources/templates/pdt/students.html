@@ -54,8 +54,16 @@
     </section>
 
     <section class="card">
-        <h2 th:text="'Danh sách sinh viên (' + ${#lists.size(students)} + ')'">Danh sách sinh viên</h2>
-        <p th:if="${#lists.isEmpty(students)}" class="muted">Chưa có sinh viên nào.</p>
+        <h2 th:text="${q != ''} ? 'Danh sách sinh viên (' + ${#lists.size(students)} + ' / ' + ${totalStudents} + ')' : 'Danh sách sinh viên (' + ${totalStudents} + ')'">Danh sách sinh viên</h2>
+        <form th:action="@{/pdt/students}" method="get" class="row search-row">
+            <label class="search-field">Tìm theo tên hoặc mã số sinh viên
+                <input type="search" name="q" th:value="${q}" placeholder="VD: 20230002 hoặc Nguyễn Văn A" autocomplete="off">
+            </label>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+            <a th:if="${q != ''}" th:href="@{/pdt/students}" class="btn">Xóa lọc</a>
+        </form>
+        <p th:if="${#lists.isEmpty(students) and q == ''}" class="muted">Chưa có sinh viên nào.</p>
+        <p th:if="${#lists.isEmpty(students) and q != ''}" class="muted" th:text="'Không tìm thấy sinh viên nào khớp với “' + ${q} + '”.'"></p>
         <div class="table-wrap" th:unless="${#lists.isEmpty(students)}">
         <table>
             <thead>
@@ -70,6 +78,7 @@
                 <td class="center"><span th:class="${@fmt.warningCss(s.academicWarningLevel)}" th:text="${@fmt.warning(s.academicWarningLevel)}"></span></td>
                 <td>
                     <form th:action="@{/pdt/students/{id}/warning(id=${s.id})}" method="post" class="row">
+                        <input type="hidden" name="q" th:value="${q}">
                         <select name="level">
                             <option th:each="lv : ${#numbers.sequence(0, 3)}" th:value="${lv}"
                                     th:text="${@fmt.warning(lv)}"
