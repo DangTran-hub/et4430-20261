@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Quản lý sinh viên')}"></head>
+<body>
+<header th:replace="~{fragments :: pdtTop}"></header>
+<div class="admin">
+    <aside th:replace="~{fragments :: pdtSide('students')}"></aside>
+    <main class="admin-main">
+        <div class="content">
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <section class="card">
+        <h2>Tạo tài khoản sinh viên</h2>
+        <form th:action="@{/pdt/students}" method="post" class="stack">
+            <div class="row">
+                <label>Mã số sinh viên *
+                    <input type="text" name="studentCode" required th:value="${form['studentCode']}" placeholder="20230006">
+                </label>
+                <label>Họ và tên *
+                    <input type="text" name="fullName" required th:value="${form['fullName']}" placeholder="Nguyễn Văn A">
+                </label>
+                <label>Email
+                    <input type="email" name="email" th:value="${form['email']}" placeholder="sv06@example.edu.vn">
+                </label>
+            </div>
+            <div class="row">
+                <label>Chương trình
+                    <input type="text" name="programCode" th:value="${form['programCode']}">
+                </label>
+                <label>Khóa (năm nhập học)
+                    <input type="number" name="cohortYear" min="2000" max="2100" th:value="${form['cohortYear']}" placeholder="2023">
+                </label>
+                <label>Lớp
+                    <input type="text" name="classCode" th:value="${form['classCode']}" placeholder="ET-E4 01">
+                </label>
+                <label>Mức cảnh báo học tập
+                    <select name="warningLevel">
+                        <option th:each="lv : ${#numbers.sequence(0, 3)}" th:value="${lv}"
+                                th:text="${@fmt.warning(lv)}"
+                                th:selected="${form['warningLevel'] == '' + lv}"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="row">
+                <label>Tên đăng nhập *
+                    <input type="text" name="username" required th:value="${form['username']}" placeholder="sv06">
+                </label>
+                <label>Mật khẩu * (ít nhất 6 ký tự)
+                    <input type="password" name="password" required minlength="6" autocomplete="new-password">
+                </label>
+                <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2 th:text="'Danh sách sinh viên (' + ${#lists.size(students)} + ')'">Danh sách sinh viên</h2>
+        <p th:if="${#lists.isEmpty(students)}" class="muted">Chưa có sinh viên nào.</p>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(students)}">
+        <table>
+            <thead>
+            <tr><th>MSSV</th><th>Họ tên</th><th>Tên đăng nhập</th><th>Lớp</th><th>Mức cảnh báo</th><th>Đổi mức cảnh báo</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${students}">
+                <td th:text="${s.studentCode}"></td>
+                <td th:text="${s.user.fullName}"></td>
+                <td th:text="${s.user.username}"></td>
+                <td th:text="${s.classCode}"></td>
+                <td class="center"><span th:class="${@fmt.warningCss(s.academicWarningLevel)}" th:text="${@fmt.warning(s.academicWarningLevel)}"></span></td>
+                <td>
+                    <form th:action="@{/pdt/students/{id}/warning(id=${s.id})}" method="post" class="row">
+                        <select name="level">
+                            <option th:each="lv : ${#numbers.sequence(0, 3)}" th:value="${lv}"
+                                    th:text="${@fmt.warning(lv)}"
+                                    th:selected="${lv == s.academicWarningLevel}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+        </div>
+        <footer th:replace="~{fragments :: footer}"></footer>
+    </main>
+</div>
+</body>
+</html>
