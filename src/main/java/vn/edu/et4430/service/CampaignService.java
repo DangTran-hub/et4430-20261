@@ -155,18 +155,35 @@ public class CampaignService {
         return new PrepareResult(campaign, message);
     }
 
-    /** UC1 bước 4 / 5a: sửa thời gian đăng ký của đợt nháp. */
+    /**
+     * UC1 bước 4: sửa thời gian đăng ký. Đợt nháp sửa tự do; đợt đã công bố vẫn sửa được
+     * (ví dụ gia hạn) và thông báo gửi sinh viên được cập nhật theo thời gian mới.
+     */
     @Transactional
     public void updateDates(Long campaignId, String openAt, String closeAt) {
-        RegistrationCampaign campaign = getDraft(campaignId);
+        RegistrationCampaign campaign = get(campaignId);
+        if (CANCELLED.equals(campaign.getStatus())) {
+            throw new BusinessException("Đợt đăng ký đã hủy, không thể sửa.");
+        }
+        boolean published = PUBLISHED.equals(campaign.getStatus());
         OffsetDateTime open = AppTime.parseInput(openAt);
         OffsetDateTime close = AppTime.parseInput(closeAt);
+        if (published && (open == null || close == null)) {
+            throw new BusinessException("Đợt đã công bố phải có đủ thời gian bắt đầu và kết thúc.");
+        }
         if (open != null && close != null && !close.isAfter(open)) {
             throw new BusinessException("Thời gian kết thúc đăng ký phải sau thời gian bắt đầu.");
         }
         campaign.setRegistrationOpenAt(open);
         campaign.setRegistrationCloseAt(close);
         touch(campaign);
+        if (published) {
+            notificationRepo.findByCampaign_Id(campaignId).ifPresent(n -> {
+                n.setBody(notificationBody(campaign.getTerm(), open, close)
+                        + " (Cập nhật thời gian ngày " + AppTime.display(AppTime.now()) + ".)");
+                notificationRepo.save(n);
+            });
+        }
     }
 
     /** UC1 bước 4: bỏ / mở lại một học phần trong đợt nháp. */
@@ -221,11 +238,7 @@ public class CampaignService {
             Notification n = new Notification();
             n.setCampaign(campaign);
             n.setTitle("Thông báo đăng ký học phần " + TermTypes.fullName(term));
-            n.setBody("Phòng Đào tạo thông báo thời gian đăng ký học phần " + TermTypes.fullName(term)
-                    + ": từ " + AppTime.display(open) + " đến " + AppTime.display(close) + ". "
-                    + "Sinh viên bị cảnh báo học tập chỉ được đăng ký số tín chỉ tối đa theo mức cảnh báo "
-                    + "(mức 1: 14 tín chỉ, mức 2: 10 tín chỉ); sinh viên cảnh báo mức 3 không được đăng ký. "
-                    + "Sinh viên đăng nhập hệ thống để xem danh sách học phần và mức cảnh báo của mình.");
+            n.setBody(notificationBody(term, open, close));
             n.setPublishedAt(now);
             n.setCreatedBy(pdt);
             notificationRepo.save(n);
@@ -271,6 +284,14 @@ public class CampaignService {
             throw new BusinessException("Chỉ sửa được đợt đăng ký đang ở trạng thái nháp.");
         }
         return campaign;
+    }
+
+    private static String notificationBody(AcademicTerm term, OffsetDateTime open, OffsetDateTime close) {
+        return "Phòng Đào tạo thông báo thời gian đăng ký học phần " + TermTypes.fullName(term)
+                + ": từ " + AppTime.display(open) + " đến " + AppTime.display(close) + ". "
+                + "Sinh viên bị cảnh báo học tập chỉ được đăng ký số tín chỉ tối đa theo mức cảnh báo "
+                + "(mức 1: 14 tín chỉ, mức 2: 10 tín chỉ); sinh viên cảnh báo mức 3 không được đăng ký. "
+                + "Sinh viên đăng nhập hệ thống để xem danh sách học phần và mức cảnh báo của mình.";
     }
 
     private UserAccount findUser(String username) {

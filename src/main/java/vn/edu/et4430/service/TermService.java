@@ -137,4 +137,25 @@ public class TermService {
         term.setStatus(PLANNING);
         return termRepo.save(term);
     }
+
+    /** PĐT sửa ngày bắt đầu / kết thúc của học kỳ. */
+    @Transactional
+    public AcademicTerm updateDates(Long termId, String start, String end) {
+        AcademicTerm term = termRepo.findById(termId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy học kỳ."));
+        LocalDate s;
+        LocalDate e;
+        try {
+            s = LocalDate.parse(start);
+            e = LocalDate.parse(end);
+        } catch (RuntimeException ex) {
+            throw new BusinessException("Cần nhập đủ ngày bắt đầu và ngày kết thúc học kỳ.");
+        }
+        if (!e.isAfter(s)) {
+            throw new BusinessException("Ngày kết thúc học kỳ phải sau ngày bắt đầu.");
+        }
+        term.setTermStartDate(s);
+        term.setTermEndDate(e);
+        return termRepo.save(term);
+    }
 }
