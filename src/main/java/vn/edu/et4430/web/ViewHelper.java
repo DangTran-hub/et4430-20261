@@ -8,6 +8,7 @@ import vn.edu.et4430.entity.RegistrationCampaign;
 import vn.edu.et4430.service.AppTime;
 import vn.edu.et4430.service.CampaignService;
 import vn.edu.et4430.service.StudentRegistrationService;
+import vn.edu.et4430.service.TermService;
 import vn.edu.et4430.service.TermTypes;
 import vn.edu.et4430.service.WarningPolicy;
 
@@ -25,6 +26,11 @@ public class ViewHelper {
 
     public String term(AcademicTerm term) {
         return term == null ? "" : TermTypes.fullName(term);
+    }
+
+    /** Mã kỳ dạng 20261. */
+    public String termCode(AcademicTerm term) {
+        return term == null ? "" : TermService.code(term);
     }
 
     public String termType(AcademicTerm term) {

@@ -24,6 +24,8 @@ import vn.edu.et4430.repository.CourseRepository;
 import vn.edu.et4430.repository.RegistrationCampaignRepository;
 import vn.edu.et4430.service.BusinessException;
 import vn.edu.et4430.service.CampaignService;
+import vn.edu.et4430.service.TermService;
+import vn.edu.et4430.entity.AcademicTerm;
 
 /** Màn hình Phòng Đào tạo – UC1. */
 @Controller
@@ -36,14 +38,17 @@ public class PdtController {
     private final CampaignCourseRepository campaignCourseRepo;
     private final CourseRepository courseRepo;
     private final CourseRegistrationRepository registrationRepo;
+    private final TermService termService;
 
     public PdtController(CampaignService campaignService,
+                         TermService termService,
                          AcademicTermRepository termRepo,
                          RegistrationCampaignRepository campaignRepo,
                          CampaignCourseRepository campaignCourseRepo,
                          CourseRepository courseRepo,
                          CourseRegistrationRepository registrationRepo) {
         this.campaignService = campaignService;
+        this.termService = termService;
         this.termRepo = termRepo;
         this.campaignRepo = campaignRepo;
         this.campaignCourseRepo = campaignCourseRepo;
@@ -62,7 +67,22 @@ public class PdtController {
         model.addAttribute("terms", termRepo.findAllByOrderByAcademicYearDescTermCodeAsc());
         model.addAttribute("campaignByTerm", campaignByTerm);
         model.addAttribute("campaigns", campaigns);
+        model.addAttribute("currentTerm", termService.currentTerm().orElse(null));
+        model.addAttribute("nextTerm", termService.suggestNext());
         return "pdt/index";
+    }
+
+    /** Nút "Tạo học kỳ mới": tạo kỳ ngay sau kỳ mới nhất (20261 -> 20262 -> 20263 -> 20271). */
+    @PostMapping("/terms/next")
+    public String createNextTerm(RedirectAttributes ra) {
+        try {
+            AcademicTerm term = termService.createNext();
+            ra.addFlashAttribute("info", "Đã tạo học kỳ " + TermService.code(term)
+                    + ". Bấm \"Mở đợt\" ở dòng học kỳ này để mở đăng ký học phần.");
+        } catch (BusinessException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/pdt";
     }
 
     /** UC1 bước 3: hệ thống chuẩn bị đợt nháp. */
